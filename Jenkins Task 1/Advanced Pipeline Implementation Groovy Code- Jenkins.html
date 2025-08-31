@@ -1,10 +1,11 @@
-pipeline {
+ pipeline {
     agent any
 
     parameters {
         choice(name: 'TEST_SUITE', choices: ['smoke','regression','full'], description: 'Test Suite to Execute')
         choice(name: 'BROWSER', choices: ['chrome','edge','all'], description: 'Browser selection or all for multi-browser')
         string(name: 'BASE_URL', defaultValue: 'https://parabank.parasoft.com', description: 'Environment URL')
+
         booleanParam(name: 'SKIP_SMOKE', defaultValue: false, description: 'Skip smoke tests')
         booleanParam(name: 'ENABLE_RETRIES', defaultValue: true, description: 'Enable retry mechanism')
         choice(name: 'RETRY_COUNT', choices: ['1','2','3'], description: 'Number of retries for failed tests')
@@ -42,7 +43,7 @@ pipeline {
                 }
                 stage('Install Cypress Binary') {
                     steps {
-                        echo "📦 Installing Cypress binary locally..."
+                        echo "Installing Cypress binary locally..."
                         bat 'npx cypress install'
                     }
                 }
@@ -72,9 +73,9 @@ pipeline {
 
                                     while (attempt <= maxRetries && !passed) {
                                         try {
-                                            if (attempt > 0) echo "🔄 Retry attempt ${attempt} for ${currentBrowser}"
+                                            if (attempt > 0) echo "Retry attempt ${attempt} for ${currentBrowser}"
 
-                                            echo "🚀 Running ${params.TEST_SUITE} tests on ${currentBrowser}..."
+                                            echo "Running ${params.TEST_SUITE} tests on ${currentBrowser}..."
                                             def suite = params.TEST_SUITE
                                             def cmd = """
                                             npx cypress run --browser ${currentBrowser} ^
@@ -89,15 +90,15 @@ pipeline {
                                             def reportStatus = bat(script: "dir cypress\\reports\\*${suite}-${currentBrowser}-*.xml /b 2>nul", returnStatus: true)
                                             if (reportStatus == 0) {
                                                 passed = true
-                                                echo "✅ ${currentBrowser} tests passed"
+                                                echo "${currentBrowser} tests passed"
                                             } else {
                                                 throw new Exception("No test reports generated for ${currentBrowser}")
                                             }
                                         } catch (Exception e) {
                                             attempt++
-                                            echo "❌ Attempt ${attempt} failed for ${currentBrowser}: ${e.getMessage()}"
+                                            echo "Attempt ${attempt} failed for ${currentBrowser}: ${e.getMessage()}"
                                             if (attempt > maxRetries) {
-                                                echo "💥 All retries exhausted for ${currentBrowser}"
+                                                echo "All retries exhausted for ${currentBrowser}"
                                                 currentBuild.result = 'UNSTABLE'
                                             } else {
                                                 sleep(5)
@@ -116,7 +117,7 @@ pipeline {
 
         stage('Report Generation') {
             steps {
-                echo "📊 Publishing JUnit reports..."
+                echo "Publishing JUnit reports..."
                 junit 'cypress/reports/*.xml'
             }
         }
@@ -134,8 +135,8 @@ pipeline {
                 stage('Summary Notification') {
                     steps {
                         script {
-                            echo "📋 Build Result: ${currentBuild.result ?: 'SUCCESS'}"
-                            echo "🔗 Build URL: ${env.BUILD_URL}"
+                            echo "Build Result: ${currentBuild.result ?: 'SUCCESS'}"
+                            echo "Build URL: ${env.BUILD_URL}"
                         }
                     }
                 }
