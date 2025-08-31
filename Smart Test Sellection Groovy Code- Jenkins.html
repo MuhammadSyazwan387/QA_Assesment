@@ -39,7 +39,7 @@ pipeline {
                         echo "📅 Weekday detected: Running SMOKE tests only"
                         testSuite = 'smoke'
                     } else {
-                        echo "📅 Weekend detected: Running FULL regression"
+                        echo "Weekend detected: Running FULL regression"
                         testSuite = 'full'
                     }
 
@@ -59,10 +59,10 @@ pipeline {
                     while (attempt <= env.RETRY_COUNT.toInteger() && !testPassed) {
                         try {
                             if (attempt > 0) {
-                                echo "🔄 Retry attempt ${attempt} for ${env.TEST_SUITE} tests"
+                                echo Retry attempt ${attempt} for ${env.TEST_SUITE} tests"
                             }
 
-                            echo "🚀 Running ${env.TEST_SUITE} tests..."
+                            echo "Running ${env.TEST_SUITE} tests..."
                             
                             def cypressCommand = "npx cypress run --browser chrome --config baseUrl=${params.BASE_URL} --reporter junit --reporter-options mochaFile=cypress/reports/${env.TEST_SUITE}-[hash].xml,toConsole=true --env grepTags=${env.TEST_SUITE}"
                             bat cypressCommand
@@ -70,16 +70,16 @@ pipeline {
                             // Check for report
                             def reportExists = bat(script: 'dir cypress\\reports\\*.xml /b 2>nul', returnStatus: true)
                             if (reportExists == 0) {
-                                echo "✅ Tests completed successfully"
+                                echo "Tests completed successfully"
                                 testPassed = true
                             } else {
-                                throw new Exception("❌ Test report not found, marking as failed")
+                                throw new Exception("Test report not found, marking as failed")
                             }
 
                             // Skip non-critical tests if build exceeds MAX_BUILD_TIME
                             def elapsedMinutes = (System.currentTimeMillis() - startTime) / 60000
                             if (elapsedMinutes > env.MAX_BUILD_TIME_MINUTES.toInteger()) {
-                                echo "⚠️ Build exceeded ${env.MAX_BUILD_TIME_MINUTES} minutes, skipping non-critical tests"
+                                echo "Build exceeded ${env.MAX_BUILD_TIME_MINUTES} minutes, skipping non-critical tests"
                                 break
                             }
 
@@ -88,7 +88,7 @@ pipeline {
                             echo e.getMessage()
                             if (attempt > env.RETRY_COUNT.toInteger()) {
                                 currentBuild.result = 'UNSTABLE'
-                                echo "💥 All retry attempts exhausted"
+                                echo "All retry attempts exhausted"
                             } else {
                                 sleep(time: 5, unit: 'SECONDS')
                             }
@@ -101,7 +101,7 @@ pipeline {
         stage('Generate Reports') {
             steps {
                 script {
-                    echo "📊 Publishing test reports..."
+                    echo "Publishing test reports..."
                     junit 'cypress/reports/*.xml'
                 }
             }
@@ -110,7 +110,7 @@ pipeline {
         stage('Cleanup') {
             steps {
                 script {
-                    echo "🧹 Cleaning up temporary files..."
+                    echo "Cleaning up temporary files..."
                     bat 'rmdir /s /q cypress\\downloads 2>nul || echo No downloads to clean'
                     bat 'del /q cypress\\reports\\*.xml 2>nul || echo No old XML reports to delete'
                 }
@@ -120,16 +120,16 @@ pipeline {
 
     post {
         success {
-            echo "✅ Pipeline completed successfully"
+            echo "Pipeline completed successfully"
         }
         unstable {
-            echo "⚠️ Some tests failed, check reports"
+            echo "Some tests failed, check reports"
         }
         failure {
-            echo "❌ Pipeline failed"
+            echo "Pipeline failed"
         }
         always {
-            echo "🏁 Pipeline finished at ${new Date()}"
+            echo "Pipeline finished at ${new Date()}"
         }
     }
 }
