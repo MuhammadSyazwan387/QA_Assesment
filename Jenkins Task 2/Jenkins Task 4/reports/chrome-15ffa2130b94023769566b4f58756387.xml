@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Mocha Tests" time="3.425" tests="1" failures="0">
+  <testsuite name="Root Suite" timestamp="2025-08-31T17:08:28" tests="0" file="cypress\e2e\2-advanced-examples\login.cy.js" time="0.000" failures="0">
+  </testsuite>
+  <testsuite name="Parabank Login Test" timestamp="2025-08-31T17:08:28" tests="1" time="3.400" failures="0">
+    <testcase name="Parabank Login Test logs in successfully with valid credentials" time="3.383" classname="logs in successfully with valid credentials">
+    </testcase>
+  </testsuite>
+</testsuites>
